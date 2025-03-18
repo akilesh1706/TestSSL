@@ -10,6 +10,10 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
+# Clear output files
+> cleaned_tls_info.txt
+> tls_info.txt
+
 TARGET=$1
 OUTPUT_FILE="tls_info.txt"
 
@@ -24,13 +28,13 @@ fi
 
 # Extract TLS versions
 echo "TLS Versions Supported:" > "$OUTPUT_FILE"
-grep -E "TLS 1\.[0-3]" testssl_output.txt | grep -E "offered|not offered" >> "$OUTPUT_FILE"
+grep -E "TLS 1\.[0-3].*(offered|not offered)" testssl_output.txt | sort -u >> "$OUTPUT_FILE"
 
 # Extract Cipher Suites
 echo -e "\nTLS Cipher Suites Supported:" >> "$OUTPUT_FILE"
-awk '/Testing server.s cipher preferences/,/Server signature algorithm/' testssl_output.txt | grep -E "TLS|offered|WITH_" >> "$OUTPUT_FILE"
+awk '/Testing server.s cipher preferences/,/Server signature algorithm/' testssl_output.txt | grep -E "TLS|offered|WITH_" | sort -u >> "$OUTPUT_FILE"
 
-#Cleaning the output
+# Cleaning the output
 sed 's/\x1b\[[0-9;]*m//g' "$OUTPUT_FILE" > cleaned_tls_info.txt
 
 # Show the extracted information
